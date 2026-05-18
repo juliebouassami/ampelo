@@ -1,0 +1,14 @@
+# deps
+node_modules/
+
+# next
+.next/
+out/
+
+# env — ne jamais committer la clé API
+.env.local
+.env*.local
+
+# OS
+.DS_Store
+Thumbs.db
