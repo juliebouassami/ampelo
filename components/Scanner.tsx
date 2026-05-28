@@ -9,7 +9,7 @@ interface ScannerProps {
 }
 
 export default function Scanner({ onCapture }: ScannerProps) {
-  const bouteillRef = useRef<HTMLInputElement>(null)
+  const bouteilleRef = useRef<HTMLInputElement>(null)
   const carteRef = useRef<HTMLInputElement>(null)
 
   return (
@@ -44,9 +44,8 @@ export default function Scanner({ onCapture }: ScannerProps) {
       {/* CTAs */}
       <div className="flex flex-col items-center gap-3 w-full">
 
-        {/* Primary — bouteille */}
         <input
-          ref={bouteillRef}
+          ref={bouteilleRef}
           type="file"
           accept="image/*"
           capture="environment"
@@ -58,8 +57,8 @@ export default function Scanner({ onCapture }: ScannerProps) {
           className="hidden"
         />
         <button
-          onClick={() => bouteillRef.current?.click()}
-          className="w-full rounded-full py-5 px-8 text-xs tracking-[0.2em] uppercase transition-all duration-200 active:scale-95 flex items-center justify-center gap-3 cursor-pointer"
+          onClick={() => bouteilleRef.current?.click()}
+          className="w-full rounded-full py-5 px-8 transition-all duration-200 active:scale-95 flex flex-col items-center justify-center gap-1 cursor-pointer"
           style={{
             backgroundColor: 'var(--color-bordeaux)',
             color: 'var(--color-cream)',
@@ -68,11 +67,15 @@ export default function Scanner({ onCapture }: ScannerProps) {
           onMouseEnter={e => (e.currentTarget.style.backgroundColor = 'var(--color-bordeaux-dark)')}
           onMouseLeave={e => (e.currentTarget.style.backgroundColor = 'var(--color-bordeaux)')}
         >
-          <CameraIcon />
-          Scanner une bouteille
+          <span className="flex items-center gap-3 text-xs tracking-[0.2em] uppercase">
+            <CameraIcon />
+            Scanner une bouteille
+          </span>
+          <span style={{ fontSize: '10px', opacity: 0.6, letterSpacing: '0.05em' }}>
+            étiquette recto ou verso
+          </span>
         </button>
 
-        {/* Secondary — carte */}
         <input
           ref={carteRef}
           type="file"
@@ -87,7 +90,7 @@ export default function Scanner({ onCapture }: ScannerProps) {
         />
         <button
           onClick={() => carteRef.current?.click()}
-          className="w-full rounded-full py-4 px-8 text-xs tracking-[0.2em] uppercase transition-all duration-200 active:scale-95 flex items-center justify-center gap-3 cursor-pointer"
+          className="w-full rounded-full py-5 px-8 text-xs tracking-[0.2em] uppercase transition-all duration-200 active:scale-95 flex items-center justify-center gap-3 cursor-pointer"
           style={{
             border: '1px solid var(--color-bordeaux)',
             color: 'var(--color-bordeaux)',
@@ -104,12 +107,8 @@ export default function Scanner({ onCapture }: ScannerProps) {
           }}
         >
           <MenuIcon />
-          Scanner une carte
+          Scanner une carte des vins
         </button>
-
-        <p className="text-xs pt-1" style={{ color: 'var(--color-brown)', opacity: 0.38 }}>
-          Photo de l'étiquette · recto ou verso
-        </p>
       </div>
     </div>
   )
@@ -117,28 +116,9 @@ export default function Scanner({ onCapture }: ScannerProps) {
 
 function WineGlassIcon() {
   return (
-    <svg
-      width="36"
-      height="52"
-      viewBox="0 0 36 52"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      style={{ color: 'var(--color-bordeaux)' }}
-    >
-      <path
-        d="M6 3h24L24 21c-1.2 5-3.5 8-6 8.5V44M12 44h12"
-        stroke="currentColor"
-        strokeWidth="1.4"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M7.5 12c2.5 7 8 11 10.5 11s8-4 10.5-11"
-        stroke="currentColor"
-        strokeWidth="1.4"
-        strokeLinecap="round"
-        opacity="0.35"
-      />
+    <svg width="36" height="52" viewBox="0 0 36 52" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ color: 'var(--color-bordeaux)' }}>
+      <path d="M6 3h24L24 21c-1.2 5-3.5 8-6 8.5V44M12 44h12" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M7.5 12c2.5 7 8 11 10.5 11s8-4 10.5-11" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" opacity="0.35" />
     </svg>
   )
 }
