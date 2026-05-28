@@ -5,6 +5,7 @@ import type { StyleTag } from './WineCard'
 
 export interface WineListItem {
   nom: string
+  millesime?: string
   cepages: string
   notes: string
   style: StyleTag
@@ -61,24 +62,12 @@ export default function WineList({ data, onReset }: WineListProps) {
     <div className="flex flex-col gap-6 w-full max-w-sm px-2 pb-8">
 
       {/* Header */}
-      <div className="flex flex-col items-center gap-2 text-center">
-        <p
-          className="text-xs tracking-[0.2em] uppercase"
-          style={{ color: 'var(--color-brown)', opacity: 0.4 }}
-        >
-          {data.vins.length} vin{data.vins.length > 1 ? 's' : ''} détecté{data.vins.length > 1 ? 's' : ''}
-        </p>
-        <h1
-          className="italic"
-          style={{
-            color: 'var(--color-bordeaux)',
-            fontFamily: 'var(--font-playfair)',
-            fontSize: '1.8rem',
-          }}
-        >
-          La carte
-        </h1>
-      </div>
+      <h1
+        className="italic text-center"
+        style={{ color: 'var(--color-bordeaux)', fontFamily: 'var(--font-playfair)', fontSize: '1.8rem' }}
+      >
+        La carte
+      </h1>
 
       {/* Filter bar */}
       {availableStyles.length > 1 && (
@@ -134,45 +123,45 @@ function WineRow({ vin, last }: { vin: WineListItem; last: boolean }) {
   return (
     <div
       className="flex flex-col gap-1 py-4"
-      style={{
-        borderBottom: last ? undefined : '1px solid rgba(107, 45, 62, 0.08)',
-      }}
+      style={{ borderBottom: last ? undefined : '1px solid rgba(107, 45, 62, 0.08)' }}
     >
       <div className="flex items-start justify-between gap-3">
-        <p
-          className="italic leading-snug"
-          style={{
-            color: 'var(--color-bordeaux)',
-            fontFamily: 'var(--font-playfair)',
-            fontSize: '1.1rem',
-          }}
-        >
-          {vin.nom}
-        </p>
+        <div className="flex flex-col gap-0.5">
+          <p
+            className="italic leading-snug"
+            style={{ color: 'var(--color-bordeaux)', fontFamily: 'var(--font-playfair)', fontSize: '1.1rem' }}
+          >
+            {vin.nom}
+          </p>
+          {vin.millesime && (
+            <p
+              className="text-xs tracking-[0.1em]"
+              style={{ color: 'var(--color-brown)', opacity: 0.4 }}
+            >
+              {vin.millesime}
+            </p>
+          )}
+        </div>
         <span
-          className="shrink-0 text-xs tracking-wider px-2 py-0.5 rounded-full mt-0.5"
+          className="shrink-0 rounded-full px-2 py-0.5"
           style={{
             border: `1px solid ${color}`,
-            color: color,
+            color,
             opacity: 0.8,
             fontFamily: 'var(--font-inter)',
             fontSize: '10px',
-            letterSpacing: '0.12em',
+            letterSpacing: '0.1em',
+            textTransform: 'uppercase',
+            marginTop: '3px',
           }}
         >
           {vin.style}
         </span>
       </div>
-      <p
-        className="text-xs tracking-wide"
-        style={{ color: 'var(--color-brown)', opacity: 0.5 }}
-      >
+      <p className="text-xs tracking-wide" style={{ color: 'var(--color-brown)', opacity: 0.5 }}>
         {vin.cepages}
       </p>
-      <p
-        className="text-sm italic"
-        style={{ color: 'var(--color-brown)', opacity: 0.65, fontFamily: 'var(--font-playfair)' }}
-      >
+      <p className="text-sm italic" style={{ color: 'var(--color-brown)', opacity: 0.65, fontFamily: 'var(--font-playfair)' }}>
         {vin.notes}
       </p>
     </div>

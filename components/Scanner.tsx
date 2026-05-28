@@ -58,7 +58,7 @@ export default function Scanner({ onCapture }: ScannerProps) {
         />
         <button
           onClick={() => bouteilleRef.current?.click()}
-          className="w-full rounded-full py-5 px-8 transition-all duration-200 active:scale-95 flex flex-col items-center justify-center gap-1 cursor-pointer"
+          className="w-full rounded-full py-5 px-6 transition-all duration-200 active:scale-95 flex flex-col items-center justify-center gap-1 cursor-pointer"
           style={{
             backgroundColor: 'var(--color-bordeaux)',
             color: 'var(--color-cream)',
@@ -67,11 +67,11 @@ export default function Scanner({ onCapture }: ScannerProps) {
           onMouseEnter={e => (e.currentTarget.style.backgroundColor = 'var(--color-bordeaux-dark)')}
           onMouseLeave={e => (e.currentTarget.style.backgroundColor = 'var(--color-bordeaux)')}
         >
-          <span className="flex items-center gap-3 text-xs tracking-[0.2em] uppercase">
+          <span className="flex items-center gap-2 whitespace-nowrap" style={{ fontSize: '11px', letterSpacing: '0.14em', textTransform: 'uppercase' }}>
             <CameraIcon />
             Scanner une bouteille
           </span>
-          <span style={{ fontSize: '10px', opacity: 0.6, letterSpacing: '0.05em' }}>
+          <span style={{ fontSize: '10px', opacity: 0.6, letterSpacing: '0.04em' }}>
             étiquette recto ou verso
           </span>
         </button>
@@ -90,12 +90,15 @@ export default function Scanner({ onCapture }: ScannerProps) {
         />
         <button
           onClick={() => carteRef.current?.click()}
-          className="w-full rounded-full py-5 px-8 text-xs tracking-[0.2em] uppercase transition-all duration-200 active:scale-95 flex items-center justify-center gap-3 cursor-pointer"
+          className="w-full rounded-full py-5 px-6 whitespace-nowrap transition-all duration-200 active:scale-95 flex items-center justify-center gap-2 cursor-pointer"
           style={{
             border: '1px solid var(--color-bordeaux)',
             color: 'var(--color-bordeaux)',
             backgroundColor: 'transparent',
             fontFamily: 'var(--font-inter)',
+            fontSize: '11px',
+            letterSpacing: '0.14em',
+            textTransform: 'uppercase',
           }}
           onMouseEnter={e => {
             e.currentTarget.style.backgroundColor = 'var(--color-bordeaux)'

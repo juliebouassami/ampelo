@@ -12,7 +12,8 @@ Identifie tous les vins listés sur la carte et retourne :
   "success": true,
   "vins": [
     {
-      "nom": "nom du vin ou appellation (ex: Gevrey-Chambertin, Pouilly-Fumé, Châteauneuf-du-Pape…)",
+      "nom": "nom du vin ou appellation SANS l'année (ex: Gevrey-Chambertin, Pouilly-Fumé…)",
+      "millesime": "année si visible sur la carte (ex: 2021) ou chaîne vide",
       "cepages": "cépages en une ligne (ex: Pinot Noir, ou Grenache · Syrah · Mourvèdre)",
       "notes": "3 à 4 notes aromatiques courtes séparées par · (ex: cerise · sous-bois · épices)",
       "style": "un seul mot parmi : Puissant, Minéral, Fruité, Frais, Moelleux"
@@ -22,7 +23,7 @@ Identifie tous les vins listés sur la carte et retourne :
 
 Règles :
 - Identifie chaque vin distinct listé sur la carte.
-- Si le millésime est visible, tu peux l'intégrer dans le nom (ex: "Sancerre 2022").
+- Le millésime doit toujours être dans le champ "millesime", jamais dans "nom".
 - Pour les cépages : base-toi sur l'appellation si non indiqués.
 - Pour les notes : concrètes et évocatrices, maximum 4 mots/expressions.
 - Pour le style : Puissant (charpenté, tannique), Minéral (tendu, salin), Fruité (accessible, fruité mûr), Frais (léger, aromatique), Moelleux (sucré, rond).
