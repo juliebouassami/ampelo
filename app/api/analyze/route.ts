@@ -14,17 +14,26 @@ Si tu identifies le vin :
   "domaine": "nom du domaine ou producteur (ex: Domaine Leflaive, Château Pétrus…)",
   "millesime": "année visible sur l'étiquette (ex: 2019) ou chaîne vide si non visible",
   "appellation": "appellation AOC/AOP ou région (ex: Pomerol, Bourgogne, Vallée du Rhône…)",
+  "style": "un seul mot parmi : Puissant, Minéral, Fruité, Frais, Moelleux",
   "cepages": [
     { "nom": "Cabernet Sauvignon", "pourcentage": 70 },
     { "nom": "Merlot", "pourcentage": 30 }
-  ]
+  ],
+  "notes_aromatiques": [
+    { "famille": "Fruits", "notes": ["cerise noire", "cassis", "prune"] },
+    { "famille": "Épices", "notes": ["poivre", "réglisse"] },
+    { "famille": "Terreux", "notes": ["sous-bois", "champignon"] }
+  ],
+  "terroir": "Terrains argilo-calcaires : structure, rondeur et légère minéralité",
+  "elevage": "Élevage en fût de chêne 18 mois : vanille, toast et noisette grillée"
 }
 
-Règles pour les cépages :
-- Si les pourcentages figurent sur l'étiquette, utilise-les.
-- Sinon, estime-les d'après les proportions typiques de l'appellation.
-- Si tu n'as vraiment aucune base pour estimer, omets le champ "pourcentage".
-- Toujours mettre au moins un cépage.
+Règles :
+- Cépages : utilise les pourcentages de l'étiquette si présents, sinon estime d'après l'appellation.
+- Notes aromatiques : 2 à 4 familles pertinentes parmi Fruits / Épices / Terreux / Floraux / Boisé. 3 à 5 notes par famille, concrètes et évocatrices.
+- Terroir : une phrase courte expliquant ce que le sol et la région apportent au vin. Commence par le type de sol si connu.
+- Élevage : une phrase courte si l'élevage est connu ou typique de l'appellation. Si le vin est élevé en inox ou sans élevage notable, indique "Pas d'élevage boisé : fruit pur et fraîcheur préservée". Si inconnu, chaîne vide.
+- Style : choisis le plus représentatif du vin parmi Puissant (charpenté, tannique), Minéral (tendu, acide, salin), Fruité (arômes de fruits mûrs, accessible), Frais (léger, aromatique, peu d'alcool), Moelleux (sucre résiduel, texture ronde).
 
 Si l'image n'est pas une étiquette de vin reconnaissable :
 {
@@ -60,7 +69,7 @@ export async function POST(req: NextRequest) {
           ],
         },
       ],
-      max_tokens: 600,
+      max_tokens: 900,
       temperature: 0.2,
     })
 

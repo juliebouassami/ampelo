@@ -1,10 +1,11 @@
 'use client'
 
 import { useState } from 'react'
-import Scanner from '@/components/Scanner'
+import Scanner, { type ScanMode } from '@/components/Scanner'
 import WineCard, { type WineData } from '@/components/WineCard'
+import WineList, { type CarteData } from '@/components/WineList'
 
-type View = 'scan' | 'loading' | 'result'
+type View = 'scan' | 'loading' | 'result-bouteille' | 'result-carte'
 
 function fileToBase64(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -21,30 +22,47 @@ function fileToBase64(file: File): Promise<string> {
 export default function Home() {
   const [view, setView] = useState<View>('scan')
   const [wineData, setWineData] = useState<WineData | null>(null)
+  const [carteData, setCarteData] = useState<CarteData | null>(null)
+  const [loadingMode, setLoadingMode] = useState<ScanMode>('bouteille')
 
-  const handleCapture = async (file: File) => {
+  const handleCapture = async (file: File, mode: ScanMode) => {
     setView('loading')
+    setLoadingMode(mode)
 
     try {
       const base64 = await fileToBase64(file)
-      const res = await fetch('/api/analyze', {
+      const endpoint = mode === 'bouteille' ? '/api/analyze' : '/api/scan-carte'
+
+      const res = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ image: base64, mimeType: file.type }),
       })
 
-      const data: WineData = await res.json()
-      setWineData(data)
-      setView('result')
+      const data = await res.json()
+
+      if (mode === 'bouteille') {
+        setWineData(data as WineData)
+        setView('result-bouteille')
+      } else {
+        setCarteData(data as CarteData)
+        setView('result-carte')
+      }
     } catch {
-      setWineData({ success: false, erreur: "Erreur de connexion. Réessayez." })
-      setView('result')
+      if (mode === 'bouteille') {
+        setWineData({ success: false, erreur: 'Erreur de connexion. Réessayez.' })
+        setView('result-bouteille')
+      } else {
+        setCarteData({ success: false, erreur: 'Erreur de connexion. Réessayez.' })
+        setView('result-carte')
+      }
     }
   }
 
   const handleReset = () => {
     setView('scan')
     setWineData(null)
+    setCarteData(null)
   }
 
   return (
@@ -57,17 +75,22 @@ export default function Home() {
       )}
 
       {view === 'loading' && (
-        <LoadingState />
+        <LoadingState mode={loadingMode} />
       )}
 
-      {view === 'result' && wineData && (
+      {view === 'result-bouteille' && wineData && (
         <WineCard data={wineData} onReset={handleReset} />
+      )}
+
+      {view === 'result-carte' && carteData && (
+        <WineList data={carteData} onReset={handleReset} />
       )}
     </main>
   )
 }
 
-function LoadingState() {
+function LoadingState({ mode }: { mode: ScanMode }) {
+  const label = mode === 'carte' ? 'Lecture de la carte…' : 'Consultation de la cave…'
   return (
     <div className="flex flex-col items-center gap-7">
       <div
@@ -81,7 +104,7 @@ function LoadingState() {
         className="italic text-lg"
         style={{ color: 'var(--color-bordeaux)', fontFamily: 'var(--font-playfair)' }}
       >
-        Consultation de la cave…
+        {label}
       </p>
     </div>
   )

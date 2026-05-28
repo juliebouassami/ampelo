@@ -2,17 +2,15 @@
 
 import { useRef } from 'react'
 
+export type ScanMode = 'bouteille' | 'carte'
+
 interface ScannerProps {
-  onCapture: (file: File) => void
+  onCapture: (file: File, mode: ScanMode) => void
 }
 
 export default function Scanner({ onCapture }: ScannerProps) {
-  const inputRef = useRef<HTMLInputElement>(null)
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (file) onCapture(file)
-  }
+  const bouteillRef = useRef<HTMLInputElement>(null)
+  const carteRef = useRef<HTMLInputElement>(null)
 
   return (
     <div className="flex flex-col items-center gap-12 max-w-xs w-full text-center px-2">
@@ -43,18 +41,24 @@ export default function Scanner({ onCapture }: ScannerProps) {
         <div className="flex-1 h-px" style={{ backgroundColor: 'var(--color-bordeaux)', opacity: 0.15 }} />
       </div>
 
-      {/* CTA */}
-      <div className="flex flex-col items-center gap-4 w-full">
+      {/* CTAs */}
+      <div className="flex flex-col items-center gap-3 w-full">
+
+        {/* Primary — bouteille */}
         <input
-          ref={inputRef}
+          ref={bouteillRef}
           type="file"
           accept="image/*"
           capture="environment"
-          onChange={handleChange}
+          onChange={e => {
+            const f = e.target.files?.[0]
+            if (f) onCapture(f, 'bouteille')
+            e.target.value = ''
+          }}
           className="hidden"
         />
         <button
-          onClick={() => inputRef.current?.click()}
+          onClick={() => bouteillRef.current?.click()}
           className="w-full rounded-full py-5 px-8 text-xs tracking-[0.2em] uppercase transition-all duration-200 active:scale-95 flex items-center justify-center gap-3 cursor-pointer"
           style={{
             backgroundColor: 'var(--color-bordeaux)',
@@ -68,7 +72,42 @@ export default function Scanner({ onCapture }: ScannerProps) {
           Scanner une bouteille
         </button>
 
-        <p className="text-xs" style={{ color: 'var(--color-brown)', opacity: 0.38 }}>
+        {/* Secondary — carte */}
+        <input
+          ref={carteRef}
+          type="file"
+          accept="image/*"
+          capture="environment"
+          onChange={e => {
+            const f = e.target.files?.[0]
+            if (f) onCapture(f, 'carte')
+            e.target.value = ''
+          }}
+          className="hidden"
+        />
+        <button
+          onClick={() => carteRef.current?.click()}
+          className="w-full rounded-full py-4 px-8 text-xs tracking-[0.2em] uppercase transition-all duration-200 active:scale-95 flex items-center justify-center gap-3 cursor-pointer"
+          style={{
+            border: '1px solid var(--color-bordeaux)',
+            color: 'var(--color-bordeaux)',
+            backgroundColor: 'transparent',
+            fontFamily: 'var(--font-inter)',
+          }}
+          onMouseEnter={e => {
+            e.currentTarget.style.backgroundColor = 'var(--color-bordeaux)'
+            e.currentTarget.style.color = 'var(--color-cream)'
+          }}
+          onMouseLeave={e => {
+            e.currentTarget.style.backgroundColor = 'transparent'
+            e.currentTarget.style.color = 'var(--color-bordeaux)'
+          }}
+        >
+          <MenuIcon />
+          Scanner une carte
+        </button>
+
+        <p className="text-xs pt-1" style={{ color: 'var(--color-brown)', opacity: 0.38 }}>
           Photo de l'étiquette · recto ou verso
         </p>
       </div>
@@ -106,18 +145,19 @@ function WineGlassIcon() {
 
 function CameraIcon() {
   return (
-    <svg
-      width="16"
-      height="16"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
       <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
       <circle cx="12" cy="13" r="4" />
+    </svg>
+  )
+}
+
+function MenuIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2" />
+      <rect x="9" y="3" width="6" height="4" rx="1" />
+      <path d="M9 12h6M9 16h4" />
     </svg>
   )
 }

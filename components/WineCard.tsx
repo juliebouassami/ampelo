@@ -1,18 +1,32 @@
 'use client'
 
+export type StyleTag = 'Puissant' | 'Minéral' | 'Fruité' | 'Frais' | 'Moelleux'
+
 export interface WineData {
   success: boolean
   nom?: string
   domaine?: string
   millesime?: string
   appellation?: string
+  style?: StyleTag
   cepages?: { nom: string; pourcentage?: number }[]
+  notes_aromatiques?: { famille: string; notes: string[] }[]
+  terroir?: string
+  elevage?: string
   erreur?: string
 }
 
 interface WineCardProps {
   data: WineData
   onReset: () => void
+}
+
+const STYLE_COLORS: Record<StyleTag, string> = {
+  Puissant: '#6B2D3E',
+  Minéral: '#3D5A6B',
+  Fruité: '#7A4A2E',
+  Frais: '#2E6B4A',
+  Moelleux: '#6B5A2E',
 }
 
 export default function WineCard({ data, onReset }: WineCardProps) {
@@ -36,14 +50,15 @@ export default function WineCard({ data, onReset }: WineCardProps) {
     )
   }
 
-  const { nom, domaine, millesime, appellation, cepages } = data
+  const { nom, domaine, millesime, appellation, style, cepages, notes_aromatiques, terroir, elevage } = data
   const hasMeta = millesime || appellation
 
   return (
-    <div className="flex flex-col gap-8 max-w-xs w-full px-2">
+    <div className="flex flex-col gap-8 max-w-xs w-full px-2 pb-8">
 
-      {/* Header — nom du vin */}
-      <div className="flex flex-col gap-1 text-center">
+      {/* Header */}
+      <div className="flex flex-col items-center gap-2 text-center">
+        {style && <StyleBadge style={style} />}
         <h1
           className="italic leading-tight"
           style={{
@@ -55,16 +70,13 @@ export default function WineCard({ data, onReset }: WineCardProps) {
           {nom}
         </h1>
         {domaine && (
-          <p
-            className="text-sm tracking-wide"
-            style={{ color: 'var(--color-brown)', opacity: 0.55 }}
-          >
+          <p className="text-sm tracking-wide" style={{ color: 'var(--color-brown)', opacity: 0.55 }}>
             {domaine}
           </p>
         )}
       </div>
 
-      {/* Meta — millésime + appellation */}
+      {/* Meta */}
       {hasMeta && (
         <div
           className="flex justify-center gap-6 text-xs tracking-[0.15em] uppercase"
@@ -77,10 +89,7 @@ export default function WineCard({ data, onReset }: WineCardProps) {
             </div>
           )}
           {millesime && appellation && (
-            <div
-              className="w-px self-stretch"
-              style={{ backgroundColor: 'var(--color-bordeaux)', opacity: 0.15 }}
-            />
+            <div className="w-px self-stretch" style={{ backgroundColor: 'var(--color-bordeaux)', opacity: 0.15 }} />
           )}
           {appellation && (
             <div className="flex flex-col items-center gap-1">
@@ -91,53 +100,136 @@ export default function WineCard({ data, onReset }: WineCardProps) {
         </div>
       )}
 
-      {/* Ornament */}
-      <div className="w-full flex items-center gap-3">
-        <div className="flex-1 h-px" style={{ backgroundColor: 'var(--color-bordeaux)', opacity: 0.15 }} />
-        <span style={{ color: 'var(--color-gold)', fontSize: '10px', letterSpacing: '0.3em' }}>✦</span>
-        <div className="flex-1 h-px" style={{ backgroundColor: 'var(--color-bordeaux)', opacity: 0.15 }} />
-      </div>
+      <Ornament />
 
-      {/* Cépages — star of the show */}
-      <div className="flex flex-col gap-1">
-        <p
-          className="italic text-xs tracking-[0.2em] uppercase mb-3"
-          style={{ color: 'var(--color-gold)', fontFamily: 'var(--font-playfair)' }}
-        >
-          Cépages
-        </p>
-        {cepages.map((c, i) => (
+      {/* Cépages */}
+      <Section label="Cépages">
+        {cepages!.map((c, i) => (
           <div
             key={i}
             className="flex items-center justify-between py-3"
-            style={{
-              borderBottom: i < cepages.length - 1
-                ? `1px solid rgba(107, 45, 62, 0.1)`
-                : undefined,
-            }}
+            style={{ borderBottom: i < cepages!.length - 1 ? '1px solid rgba(107, 45, 62, 0.1)' : undefined }}
           >
-            <span
-              className="italic text-lg"
-              style={{ color: 'var(--color-bordeaux)', fontFamily: 'var(--font-playfair)' }}
-            >
+            <span className="italic text-lg" style={{ color: 'var(--color-bordeaux)', fontFamily: 'var(--font-playfair)' }}>
               {c.nom}
             </span>
             {c.pourcentage !== undefined && (
-              <span
-                className="text-sm tabular-nums"
-                style={{ color: 'var(--color-brown)', opacity: 0.45 }}
-              >
+              <span className="text-sm tabular-nums" style={{ color: 'var(--color-brown)', opacity: 0.45 }}>
                 {c.pourcentage} %
               </span>
             )}
           </div>
         ))}
-      </div>
+      </Section>
+
+      {/* Notes aromatiques */}
+      {notes_aromatiques && notes_aromatiques.length > 0 && (
+        <>
+          <Ornament />
+          <Section label="Notes aromatiques">
+            <div className="flex flex-col gap-4 pt-1">
+              {notes_aromatiques.map((f, i) => (
+                <div key={i} className="flex flex-col gap-2">
+                  <p
+                    className="text-xs tracking-[0.15em] uppercase"
+                    style={{ color: 'var(--color-brown)', opacity: 0.4 }}
+                  >
+                    {f.famille}
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    {f.notes.map((note, j) => (
+                      <span
+                        key={j}
+                        className="text-sm italic"
+                        style={{ color: 'var(--color-bordeaux)', fontFamily: 'var(--font-playfair)' }}
+                      >
+                        {note}{j < f.notes.length - 1 ? ' ·' : ''}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </Section>
+        </>
+      )}
+
+      {/* Terroir & Élevage */}
+      {(terroir || elevage) && (
+        <>
+          <Ornament />
+          <Section label="Terroir & Élevage">
+            <div className="flex flex-col gap-4 pt-1">
+              {terroir && (
+                <div className="flex flex-col gap-1">
+                  <p className="text-xs tracking-[0.15em] uppercase" style={{ color: 'var(--color-brown)', opacity: 0.4 }}>
+                    Terroir
+                  </p>
+                  <p className="text-sm leading-relaxed" style={{ color: 'var(--color-brown)', opacity: 0.75 }}>
+                    {terroir}
+                  </p>
+                </div>
+              )}
+              {elevage && (
+                <div className="flex flex-col gap-1">
+                  <p className="text-xs tracking-[0.15em] uppercase" style={{ color: 'var(--color-brown)', opacity: 0.4 }}>
+                    Élevage
+                  </p>
+                  <p className="text-sm leading-relaxed" style={{ color: 'var(--color-brown)', opacity: 0.75 }}>
+                    {elevage}
+                  </p>
+                </div>
+              )}
+            </div>
+          </Section>
+        </>
+      )}
 
       {/* Reset */}
       <div className="pt-2">
         <ResetButton onClick={onReset} />
       </div>
+    </div>
+  )
+}
+
+function Section({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div className="flex flex-col gap-1">
+      <p
+        className="italic text-xs tracking-[0.2em] uppercase mb-2"
+        style={{ color: 'var(--color-gold)', fontFamily: 'var(--font-playfair)' }}
+      >
+        {label}
+      </p>
+      {children}
+    </div>
+  )
+}
+
+function StyleBadge({ style }: { style: StyleTag }) {
+  const color = STYLE_COLORS[style] ?? 'var(--color-bordeaux)'
+  return (
+    <span
+      className="text-xs tracking-[0.2em] uppercase px-3 py-1 rounded-full"
+      style={{
+        border: `1px solid ${color}`,
+        color: color,
+        opacity: 0.75,
+        fontFamily: 'var(--font-inter)',
+      }}
+    >
+      {style}
+    </span>
+  )
+}
+
+function Ornament() {
+  return (
+    <div className="w-full flex items-center gap-3">
+      <div className="flex-1 h-px" style={{ backgroundColor: 'var(--color-bordeaux)', opacity: 0.12 }} />
+      <span style={{ color: 'var(--color-gold)', fontSize: '10px', letterSpacing: '0.3em' }}>✦</span>
+      <div className="flex-1 h-px" style={{ backgroundColor: 'var(--color-bordeaux)', opacity: 0.12 }} />
     </div>
   )
 }
