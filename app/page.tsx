@@ -180,10 +180,7 @@ export default function Home() {
 function LoadingState() {
   return (
     <div className="flex flex-col items-center gap-7">
-      <div
-        className="w-10 h-10 rounded-full border animate-spin"
-        style={{ borderColor: 'rgba(107, 45, 62, 0.15)', borderTopColor: 'var(--color-bordeaux)' }}
-      />
+      <WineGlassLoader />
       <p
         className="italic text-lg"
         style={{ color: 'var(--color-bordeaux)', fontFamily: 'var(--font-playfair)' }}
@@ -191,5 +188,23 @@ function LoadingState() {
         Consultation de la cave…
       </p>
     </div>
+  )
+}
+
+function WineGlassLoader() {
+  return (
+    <svg
+      width="44"
+      height="64"
+      viewBox="0 0 36 52"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className="animate-pulse"
+      style={{ color: 'var(--color-bordeaux)' }}
+      aria-hidden="true"
+    >
+      <path d="M6 3h24L24 21c-1.2 5-3.5 8-6 8.5V44M12 44h12" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M7.5 12c2.5 7 8 11 10.5 11s8-4 10.5-11" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" opacity="0.35" />
+    </svg>
   )
 }

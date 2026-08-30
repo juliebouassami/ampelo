@@ -7,7 +7,7 @@ interface ScannerProps {
 
 export default function Scanner({ onOpenBouteille, onOpenCarte }: ScannerProps) {
   return (
-    <div className="flex flex-col items-center gap-12 max-w-xs w-full text-center px-2">
+    <div className="flex flex-col items-center gap-12 max-w-xs sm:max-w-md w-full text-center px-2">
 
       <div className="flex flex-col items-center gap-5">
         <WineGlassIcon />
@@ -18,12 +18,17 @@ export default function Scanner({ onOpenBouteille, onOpenCarte }: ScannerProps) 
           >
             Ampélo
           </h1>
-          <div className="flex flex-col gap-1.5" style={{ color: 'var(--color-brown)', opacity: 0.55 }}>
-            <p className="text-sm leading-relaxed">
-              Le cépage n&apos;est pas toujours indiqué, et pourtant c&apos;est lui qui guide les arômes.
+          <div className="flex flex-col gap-2 max-w-xs sm:max-w-md" style={{ color: 'var(--color-brown)', opacity: 0.55 }}>
+            <p className="text-sm sm:text-[15px] leading-relaxed">
+              Le cépage façonne les arômes et le caractère du vin.{' '}
+              <span className="whitespace-nowrap">Pourtant, il n&apos;est</span> pas toujours indiqué.
             </p>
-            <p className="text-sm leading-relaxed">
-              Scannez une bouteille ou une carte des vins pour en savoir plus.
+            <p className="text-sm sm:text-[15px] leading-relaxed">
+              Scannez une bouteille pour découvrir son cépage, ses arômes et son profil.
+            </p>
+            <p className="text-sm sm:text-[15px] leading-relaxed">
+              Au restaurant, scannez une carte pour comparer les vins et choisir celui qui{' '}
+              <span className="whitespace-nowrap">s&apos;accorde le mieux</span> à vos envies.
             </p>
           </div>
         </div>

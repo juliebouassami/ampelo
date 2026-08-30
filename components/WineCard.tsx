@@ -100,7 +100,7 @@ export default function WineCard({ data, onReset, onRetry, onBack, resetLabel }:
             className="flex items-center justify-between py-2"
             style={{ borderBottom: i < cepages!.length - 1 ? '1px solid rgba(107, 45, 62, 0.1)' : undefined }}
           >
-            <span className="italic text-base" style={{ color: 'var(--color-bordeaux)', fontFamily: 'var(--font-playfair)' }}>
+            <span className="italic text-sm leading-relaxed" style={{ color: 'var(--color-bordeaux)', fontFamily: 'var(--font-playfair)' }}>
               {c.nom}
             </span>
             {c.pourcentage !== undefined && (
