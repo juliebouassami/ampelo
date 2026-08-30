@@ -1,9 +1,11 @@
 'use client'
 
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Scanner from '@/components/Scanner'
 import WineCard, { type WineData } from '@/components/WineCard'
 import WineList, { type CarteData, type WineListItem } from '@/components/WineList'
+import type { Locale } from '@/lib/i18n'
+import { DEFAULT_LOCALE, ui } from '@/lib/i18n'
 
 export type ScanMode = 'bouteille' | 'carte'
 
@@ -36,9 +38,25 @@ export default function Home() {
   const [wineData, setWineData] = useState<WineData | null>(null)
   const [carteData, setCarteData] = useState<CarteData | null>(null)
   const [lastMode, setLastMode] = useState<ScanMode>('bouteille')
+  const [locale, setLocale] = useState<Locale>(DEFAULT_LOCALE)
 
   const bouteilleRef = useRef<HTMLInputElement>(null)
   const carteRef = useRef<HTMLInputElement>(null)
+
+  useEffect(() => {
+    if (navigator.language.toLowerCase().startsWith('en')) {
+      setLocale('en')
+    }
+  }, [])
+
+  useEffect(() => {
+    document.documentElement.lang = locale
+    document.title = ui[locale].meta.title
+  }, [locale])
+
+  const toggleLocale = () => {
+    setLocale(current => (current === 'fr' ? 'en' : 'fr'))
+  }
 
   const openCapture = (mode: ScanMode) => {
     setLastMode(mode)
@@ -57,7 +75,7 @@ export default function Home() {
       const res = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ image: base64, mimeType }),
+        body: JSON.stringify({ image: base64, mimeType, locale }),
       })
 
       const data = await res.json()
@@ -71,10 +89,10 @@ export default function Home() {
       }
     } catch {
       if (mode === 'bouteille') {
-        setWineData({ success: false, erreur: 'Erreur de connexion. Réessayez.' })
+        setWineData({ success: false, erreur: ui[locale].error.connection })
         setView('result-bouteille')
       } else {
-        setCarteData({ success: false, erreur: 'Erreur de connexion. Réessayez.' })
+        setCarteData({ success: false, erreur: ui[locale].error.connection })
         setView('result-carte')
       }
     }
@@ -86,13 +104,13 @@ export default function Home() {
       const res = await fetch('/api/wine-detail', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ nom: vin.nom, millesime: vin.millesime, cepages: vin.cepages }),
+        body: JSON.stringify({ nom: vin.nom, millesime: vin.millesime, cepages: vin.cepages, locale }),
       })
       const data = await res.json()
       setWineData(data as WineData)
       setView('result-carte-detail')
     } catch {
-      setWineData({ success: false, erreur: 'Erreur de connexion. Réessayez.' })
+      setWineData({ success: false, erreur: ui[locale].error.connection })
       setView('result-carte-detail')
     }
   }
@@ -143,16 +161,19 @@ export default function Home() {
         <Scanner
           onOpenBouteille={() => openCapture('bouteille')}
           onOpenCarte={() => openCapture('carte')}
+          locale={locale}
+          onToggleLocale={toggleLocale}
         />
       )}
 
-      {view === 'loading' && <LoadingState />}
+      {view === 'loading' && <LoadingState locale={locale} />}
 
       {view === 'result-bouteille' && wineData && (
         <WineCard
           data={wineData}
           onReset={handleReset}
           onRetry={() => openCapture('bouteille')}
+          locale={locale}
         />
       )}
 
@@ -162,6 +183,7 @@ export default function Home() {
           onReset={handleReset}
           onRetry={() => openCapture('carte')}
           onSelectWine={handleSelectWine}
+          locale={locale}
         />
       )}
 
@@ -171,13 +193,14 @@ export default function Home() {
           onReset={handleReset}
           onRetry={() => openCapture('carte')}
           onBack={handleBackToCarte}
+          locale={locale}
         />
       )}
     </main>
   )
 }
 
-function LoadingState() {
+function LoadingState({ locale }: { locale: Locale }) {
   return (
     <div className="flex flex-col items-center gap-7">
       <WineGlassLoader />
@@ -185,7 +208,7 @@ function LoadingState() {
         className="italic text-lg"
         style={{ color: 'var(--color-bordeaux)', fontFamily: 'var(--font-playfair)' }}
       >
-        Consultation de la cave…
+        {ui[locale].loading}
       </p>
     </div>
   )

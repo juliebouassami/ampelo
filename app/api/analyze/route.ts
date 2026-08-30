@@ -1,10 +1,50 @@
 import { NextRequest, NextResponse } from 'next/server'
 import OpenAI from 'openai'
-import { TAG_RULES } from '@/lib/prompts'
+import { normalizeLocale, type Locale } from '@/lib/i18n'
+import { getTagRules } from '@/lib/prompts'
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
 
-const PROMPT = `Tu es un expert en vins français et mondiaux. Analyse cette photo d'étiquette de vin.
+function getPrompt(locale: Locale): string {
+  if (locale === 'en') {
+    return `You are an expert in French and international wines. Analyze this photo of a wine label.
+
+Return ONLY a valid JSON object, with no markdown, no explanation, and no surrounding text.
+
+If you identify the wine:
+{
+  "success": true,
+  "nom": "wine name (ex: Château Margaux, Gevrey-Chambertin, Sancerre…)",
+  "domaine": "estate or producer name (ex: Domaine Leflaive, Château Pétrus…)",
+  "millesime": "year visible on the label (ex: 2019) or empty string if not visible",
+  "appellation": "AOC/AOP appellation or region (ex: Pomerol, Burgundy, Rhône Valley…)",
+  "style": "one tag from the list below",
+  "cepages": [
+    { "nom": "Cabernet Sauvignon", "pourcentage": 70 },
+    { "nom": "Merlot", "pourcentage": 30 }
+  ],
+  "notes_aromatiques": [
+    { "famille": "Fruity", "notes": ["black cherry", "blackcurrant", "plum"] },
+    { "famille": "Spicy", "notes": ["pepper", "licorice"] },
+    { "famille": "Earthy", "notes": ["forest floor", "mushroom"] }
+  ],
+  "terroir": "Clay-limestone soils: structure, roundness and a subtle mineral finish"
+}
+
+Rules:
+- Grape varieties: use percentages shown on the label when present, otherwise estimate from the typical blend of the appellation.
+- Aromatic notes: 2 to 4 relevant families among Fruity / Floral / Spicy / Earthy / Oaky / Mineral. 3 to 4 concrete, evocative notes per family.
+- Terroir: one short sentence explaining what the soil and region bring to the wine. Start with the soil type when known.
+- ${getTagRules(locale)}
+
+If the image is not a recognizable wine label:
+{
+  "success": false,
+  "erreur": "Message in English (ex: The image is too blurry to identify the wine. · This does not seem to be a wine label. · Wine not found in my knowledge base.)"
+}`
+  }
+
+  return `Tu es un expert en vins français et mondiaux. Analyse cette photo d'étiquette de vin.
 
 Retourne UNIQUEMENT un objet JSON valide, sans markdown, sans explication, sans texte autour.
 
@@ -32,21 +72,26 @@ Règles :
 - Cépages : utilise les pourcentages de l'étiquette si présents, sinon estime d'après les proportions typiques de l'appellation.
 - Notes aromatiques : 2 à 4 familles pertinentes parmi Fruité / Floral / Épicé / Terreux / Boisé / Minéral. 3 à 4 notes par famille, concrètes et évocatrices.
 - Terroir : une phrase courte expliquant ce que le sol et la région apportent au vin. Commence par le type de sol si connu.
-- ${TAG_RULES}
+- ${getTagRules(locale)}
 
 Si l'image n'est pas une étiquette de vin reconnaissable :
 {
   "success": false,
   "erreur": "Message en français (ex: Image trop floue pour identifier le vin. · Ceci ne semble pas être une étiquette de vin. · Vin non référencé dans ma base de connaissance.)"
 }`
+}
 
 export async function POST(req: NextRequest) {
+  let locale: Locale = 'fr'
+
   try {
-    const { image, mimeType } = await req.json()
+    const body = await req.json()
+    locale = normalizeLocale(body.locale)
+    const { image, mimeType } = body
 
     if (!image || !mimeType) {
       return NextResponse.json(
-        { success: false, erreur: 'Image manquante.' },
+        { success: false, erreur: locale === 'en' ? 'Missing image.' : 'Image manquante.' },
         { status: 400 }
       )
     }
@@ -57,7 +102,7 @@ export async function POST(req: NextRequest) {
         {
           role: 'user',
           content: [
-            { type: 'text', text: PROMPT },
+            { type: 'text', text: getPrompt(locale) },
             {
               type: 'image_url',
               image_url: {
@@ -83,7 +128,7 @@ export async function POST(req: NextRequest) {
   } catch (err) {
     console.error('Analyze error:', err)
     return NextResponse.json(
-      { success: false, erreur: "Erreur lors de l'analyse. Réessayez." },
+      { success: false, erreur: locale === 'en' ? 'Error during analysis. Please try again.' : "Erreur lors de l'analyse. Réessayez." },
       { status: 500 }
     )
   }

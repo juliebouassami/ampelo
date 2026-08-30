@@ -1,13 +1,33 @@
 'use client'
 
+import type { Locale } from '@/lib/i18n'
+import { ui } from '@/lib/i18n'
+
 interface ScannerProps {
   onOpenBouteille: () => void
   onOpenCarte: () => void
+  locale: Locale
+  onToggleLocale: () => void
 }
 
-export default function Scanner({ onOpenBouteille, onOpenCarte }: ScannerProps) {
+export default function Scanner({ onOpenBouteille, onOpenCarte, locale, onToggleLocale }: ScannerProps) {
+  const copy = ui[locale].home
+
   return (
     <div className="flex flex-col items-center gap-12 max-w-xs sm:max-w-md w-full text-center px-2">
+      <button
+        onClick={onToggleLocale}
+        className="self-end rounded-full px-3 py-1 text-[10px] tracking-[0.2em] uppercase cursor-pointer"
+        style={{
+          border: '1px solid rgba(107, 45, 62, 0.28)',
+          color: 'var(--color-bordeaux)',
+          backgroundColor: 'transparent',
+          fontFamily: 'var(--font-inter)',
+        }}
+        aria-label={locale === 'fr' ? 'Switch to English' : 'Passer en français'}
+      >
+        {copy.switchLanguage}
+      </button>
 
       <div className="flex flex-col items-center gap-5">
         <WineGlassIcon />
@@ -20,15 +40,14 @@ export default function Scanner({ onOpenBouteille, onOpenCarte }: ScannerProps) 
           </h1>
           <div className="flex flex-col gap-2 max-w-xs sm:max-w-md" style={{ color: 'var(--color-brown)', opacity: 0.55 }}>
             <p className="text-sm sm:text-[15px] leading-relaxed">
-              Le cépage façonne les arômes et le caractère du vin.{' '}
-              <span className="whitespace-nowrap">Pourtant, il n&apos;est</span> pas toujours indiqué.
+              {copy.intro1}{' '}
+              <span className="whitespace-nowrap">{copy.intro1b}</span>
             </p>
             <p className="text-sm sm:text-[15px] leading-relaxed">
-              Scannez une bouteille pour découvrir son cépage, ses arômes et son profil.
+              {copy.bottle}
             </p>
             <p className="text-sm sm:text-[15px] leading-relaxed">
-              Au restaurant, scannez une carte pour comparer les vins et choisir celui qui{' '}
-              <span className="whitespace-nowrap">s&apos;accorde le mieux</span> à vos envies.
+              {copy.restaurant}
             </p>
           </div>
         </div>
@@ -54,10 +73,10 @@ export default function Scanner({ onOpenBouteille, onOpenCarte }: ScannerProps) 
         >
           <span className="flex items-center gap-2 whitespace-nowrap" style={{ fontSize: '11px', letterSpacing: '0.14em', textTransform: 'uppercase' }}>
             <CameraIcon />
-            Scanner une bouteille
+            {copy.scanBottle}
           </span>
           <span style={{ fontSize: '10px', opacity: 0.6, letterSpacing: '0.04em' }}>
-            étiquette recto ou verso
+            {copy.bottleHint}
           </span>
         </button>
 
@@ -83,7 +102,7 @@ export default function Scanner({ onOpenBouteille, onOpenCarte }: ScannerProps) 
           }}
         >
           <MenuIcon />
-          Scanner une carte des vins
+          {copy.scanList}
         </button>
       </div>
     </div>

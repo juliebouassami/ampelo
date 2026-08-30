@@ -1,3 +1,5 @@
+import type { Locale } from './i18n'
+
 export const STYLE_TAGS = [
   // Rouges
   'Cassis', 'Cerise', 'Frambroise', 'Prune', 'Sous-bois', 'Épicé', 'Poivré',
@@ -51,6 +53,47 @@ const TAG_COLORS: Record<string, string> = {
   Cire: '#A89B7A',
 }
 
+const TAG_LABELS_EN: Record<string, string> = {
+  Cassis: 'Blackcurrant',
+  Cerise: 'Cherry',
+  Frambroise: 'Raspberry',
+  Prune: 'Plum',
+  'Sous-bois': 'Forest floor',
+  Épicé: 'Spicy',
+  Poivré: 'Peppery',
+  Réglisse: 'Licorice',
+  Tannique: 'Tannic',
+  Charpenté: 'Structured',
+  Terreux: 'Earthy',
+  Agrumes: 'Citrus',
+  Minéral: 'Mineral',
+  Floral: 'Floral',
+  Beurré: 'Buttery',
+  Toasté: 'Toasty',
+  Noisette: 'Hazelnut',
+  Miel: 'Honey',
+  Frais: 'Fresh',
+  Moelleux: 'Off-dry',
+  Groseille: 'Redcurrant',
+  Pêche: 'Peach',
+  Fraise: 'Strawberry',
+  Melon: 'Melon',
+  Abricot: 'Apricot',
+  Garrigue: 'Garrigue',
+  Pamplemousse: 'Grapefruit',
+  Brioche: 'Brioche',
+  Pomme: 'Apple',
+  Craie: 'Chalk',
+  Amande: 'Almond',
+  Vineux: 'Vinous',
+  Noix: 'Walnut',
+  Cire: 'Wax',
+}
+
 export function getTagColor(tag: string): string {
   return TAG_COLORS[tag] ?? '#6B2D3E'
+}
+
+export function getTagLabel(tag: string, locale: Locale): string {
+  return locale === 'en' ? TAG_LABELS_EN[tag] ?? tag : tag
 }

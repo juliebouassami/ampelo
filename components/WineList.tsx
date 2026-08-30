@@ -1,7 +1,9 @@
 'use client'
 
 import { useState } from 'react'
-import { getTagColor } from '@/lib/tags'
+import type { Locale } from '@/lib/i18n'
+import { ui } from '@/lib/i18n'
+import { getTagColor, getTagLabel } from '@/lib/tags'
 
 export interface WineListItem {
   nom: string
@@ -22,19 +24,21 @@ interface WineListProps {
   onReset: () => void
   onRetry?: () => void
   onSelectWine?: (vin: WineListItem) => void
+  locale: Locale
 }
 
-export default function WineList({ data, onReset, onRetry, onSelectWine }: WineListProps) {
+export default function WineList({ data, onReset, onRetry, onSelectWine, locale }: WineListProps) {
   const [activeFilter, setActiveFilter] = useState<string | null>(null)
+  const copy = ui[locale]
 
   if (!data.success || !data.vins?.length) {
     return (
       <div className="flex flex-col items-center gap-8 max-w-xs w-full text-center px-2">
         <p className="italic text-xl leading-snug" style={{ color: 'var(--color-bordeaux)', fontFamily: 'var(--font-playfair)' }}>
-          {data.erreur ?? 'Carte non reconnue.'}
+          {data.erreur ?? copy.error.listUnknown}
         </p>
         <p className="text-sm" style={{ color: 'var(--color-brown)', opacity: 0.5 }}>
-          Essayez avec une photo plus nette, bien éclairée, en face de la carte.
+          {copy.error.listHelp}
         </p>
         <div className="flex flex-col gap-3 w-full">
           {onRetry && (
@@ -43,7 +47,7 @@ export default function WineList({ data, onReset, onRetry, onSelectWine }: WineL
               className="w-full rounded-full py-4 px-8 text-xs tracking-[0.2em] uppercase cursor-pointer"
               style={{ backgroundColor: 'var(--color-bordeaux)', color: 'var(--color-cream)', fontFamily: 'var(--font-inter)', border: 'none' }}
             >
-              Réessayer
+              {copy.actions.retry}
             </button>
           )}
           <button
@@ -51,7 +55,7 @@ export default function WineList({ data, onReset, onRetry, onSelectWine }: WineL
             className="text-xs cursor-pointer bg-transparent border-none"
             style={{ color: 'var(--color-brown)', opacity: 0.4, fontFamily: 'var(--font-inter)' }}
           >
-            Retour
+            {copy.actions.back}
           </button>
         </div>
       </div>
@@ -71,13 +75,13 @@ export default function WineList({ data, onReset, onRetry, onSelectWine }: WineL
         className="italic text-center"
         style={{ color: 'var(--color-bordeaux)', fontFamily: 'var(--font-playfair)', fontSize: '1.8rem' }}
       >
-        La carte
+        {copy.result.listTitle}
       </h1>
 
       {availableStyles.length > 1 && (
         <div className="flex flex-wrap gap-2 justify-center">
           <FilterPill
-            label="Tous"
+            label={copy.result.all}
             active={activeFilter === null}
             color="var(--color-bordeaux)"
             onClick={() => setActiveFilter(null)}
@@ -85,7 +89,7 @@ export default function WineList({ data, onReset, onRetry, onSelectWine }: WineL
           {availableStyles.map(s => (
             <FilterPill
               key={s}
-              label={s}
+              label={getTagLabel(s, locale)}
               active={activeFilter === s}
               color={getTagColor(s)}
               onClick={() => setActiveFilter(activeFilter === s ? null : s)}
@@ -102,12 +106,13 @@ export default function WineList({ data, onReset, onRetry, onSelectWine }: WineL
             key={i}
             vin={vin}
             last={i === filtered.length - 1}
+            locale={locale}
             onClick={onSelectWine ? () => onSelectWine(vin) : undefined}
           />
         ))}
         {filtered.length === 0 && (
           <p className="text-sm text-center py-6" style={{ color: 'var(--color-brown)', opacity: 0.4 }}>
-            Aucun vin pour ce tag.
+            {copy.result.noWineForTag}
           </p>
         )}
       </div>
@@ -121,13 +126,13 @@ export default function WineList({ data, onReset, onRetry, onSelectWine }: WineL
         onMouseEnter={e => { e.currentTarget.style.backgroundColor = 'var(--color-bordeaux)'; e.currentTarget.style.color = 'var(--color-cream)' }}
         onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = 'var(--color-bordeaux)' }}
       >
-        Scanner une autre carte
+        {copy.actions.scanAnotherList}
       </button>
     </div>
   )
 }
 
-function WineRow({ vin, last, onClick }: { vin: WineListItem; last: boolean; onClick?: () => void }) {
+function WineRow({ vin, last, locale, onClick }: { vin: WineListItem; last: boolean; locale: Locale; onClick?: () => void }) {
   const color = getTagColor(vin.style)
 
   return (
@@ -162,7 +167,7 @@ function WineRow({ vin, last, onClick }: { vin: WineListItem; last: boolean; onC
             marginTop: '3px',
           }}
         >
-          {vin.style}
+          {getTagLabel(vin.style, locale)}
         </span>
       </div>
       <p className="text-xs tracking-wide" style={{ color: 'var(--color-brown)', opacity: 0.5 }}>

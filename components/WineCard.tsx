@@ -1,6 +1,8 @@
 'use client'
 
-import { getTagColor } from '@/lib/tags'
+import type { Locale } from '@/lib/i18n'
+import { ui } from '@/lib/i18n'
+import { getTagColor, getTagLabel } from '@/lib/tags'
 
 export interface WineData {
   success: boolean
@@ -21,24 +23,27 @@ interface WineCardProps {
   onRetry?: () => void
   onBack?: () => void
   resetLabel?: string
+  locale: Locale
 }
 
-export default function WineCard({ data, onReset, onRetry, onBack, resetLabel }: WineCardProps) {
+export default function WineCard({ data, onReset, onRetry, onBack, resetLabel, locale }: WineCardProps) {
+  const copy = ui[locale]
+
   if (!data.success || !data.cepages?.length) {
     return (
       <div className="flex flex-col items-center gap-6 max-w-xs w-full text-center px-2">
         <WineGlassIcon muted />
         <div className="flex flex-col gap-2">
           <p className="italic text-xl leading-snug" style={{ color: 'var(--color-bordeaux)', fontFamily: 'var(--font-playfair)' }}>
-            {data.erreur ?? 'Vin non identifié.'}
+            {data.erreur ?? copy.error.wineUnknown}
           </p>
           <p className="text-sm" style={{ color: 'var(--color-brown)', opacity: 0.5 }}>
-            Essayez avec une photo plus nette, de face, bien éclairée.
+            {copy.error.wineHelp}
           </p>
         </div>
         <div className="flex flex-col gap-3 w-full">
-          {onRetry && <PrimaryButton label="Réessayer" onClick={onRetry} />}
-          <TextLink label="Retour" onClick={onBack ?? onReset} />
+          {onRetry && <PrimaryButton label={copy.actions.retry} onClick={onRetry} />}
+          <TextLink label={copy.actions.back} onClick={onBack ?? onReset} />
         </div>
       </div>
     )
@@ -46,7 +51,7 @@ export default function WineCard({ data, onReset, onRetry, onBack, resetLabel }:
 
   const { nom, domaine, millesime, appellation, style, cepages, notes_aromatiques, terroir } = data
   const hasMetaLine = millesime || appellation
-  const actionLabel = resetLabel ?? (onBack ? 'Retour à la carte' : 'Scanner une autre bouteille')
+  const actionLabel = resetLabel ?? (onBack ? copy.actions.backToList : copy.actions.scanAnotherBottle)
   const actionHandler = onBack ?? onReset
 
   return (
@@ -87,13 +92,13 @@ export default function WineCard({ data, onReset, onRetry, onBack, resetLabel }:
               )}
             </div>
           )}
-          {style && <StyleBadge tag={style} />}
+          {style && <StyleBadge tag={style} locale={locale} />}
         </div>
       )}
 
       <Ornament />
 
-      <Section label="Cépages">
+      <Section label={copy.result.grapeVarieties}>
         {cepages!.map((c, i) => (
           <div
             key={i}
@@ -115,7 +120,7 @@ export default function WineCard({ data, onReset, onRetry, onBack, resetLabel }:
       {notes_aromatiques && notes_aromatiques.length > 0 && (
         <>
           <Ornament />
-          <Section label="Notes aromatiques">
+          <Section label={copy.result.aromaticNotes}>
             <div className="flex flex-col gap-3 pt-1">
               {notes_aromatiques.map((f, i) => (
                 <div key={i} className="flex flex-col gap-1">
@@ -135,7 +140,7 @@ export default function WineCard({ data, onReset, onRetry, onBack, resetLabel }:
       {terroir && (
         <>
           <Ornament />
-          <Section label="Terroir">
+          <Section label={copy.result.terroir}>
             <p className="italic text-sm leading-relaxed pt-1" style={{ color: 'var(--color-bordeaux)', fontFamily: 'var(--font-playfair)' }}>
               {terroir}
             </p>
@@ -165,14 +170,14 @@ function MetaDot() {
   return <span style={{ color: 'var(--color-gold)', fontSize: '8px' }}>✦</span>
 }
 
-function StyleBadge({ tag }: { tag: string }) {
+function StyleBadge({ tag, locale }: { tag: string; locale: Locale }) {
   const color = getTagColor(tag)
   return (
     <span
       className="rounded-full px-2.5 py-0.5"
       style={{ border: `1px solid ${color}`, color, opacity: 0.75, fontFamily: 'var(--font-inter)', fontSize: '10px', letterSpacing: '0.1em' }}
     >
-      {tag}
+      {getTagLabel(tag, locale)}
     </span>
   )
 }
