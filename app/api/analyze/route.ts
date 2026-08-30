@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import OpenAI from 'openai'
+import { TAG_RULES } from '@/lib/prompts'
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
 
@@ -14,7 +15,7 @@ Si tu identifies le vin :
   "domaine": "nom du domaine ou producteur (ex: Domaine Leflaive, Château Pétrus…)",
   "millesime": "année visible sur l'étiquette (ex: 2019) ou chaîne vide si non visible",
   "appellation": "appellation AOC/AOP ou région (ex: Pomerol, Bourgogne, Vallée du Rhône…)",
-  "style": "un seul mot parmi : Puissant, Minéral, Fruité, Frais, Moelleux",
+  "style": "un tag de la liste ci-dessous",
   "cepages": [
     { "nom": "Cabernet Sauvignon", "pourcentage": 70 },
     { "nom": "Merlot", "pourcentage": 30 }
@@ -31,7 +32,7 @@ Règles :
 - Cépages : utilise les pourcentages de l'étiquette si présents, sinon estime d'après les proportions typiques de l'appellation.
 - Notes aromatiques : 2 à 4 familles pertinentes parmi Fruité / Floral / Épicé / Terreux / Boisé / Minéral. 3 à 4 notes par famille, concrètes et évocatrices.
 - Terroir : une phrase courte expliquant ce que le sol et la région apportent au vin. Commence par le type de sol si connu.
-- Style : choisis le plus représentatif parmi Puissant (charpenté, tannique), Minéral (tendu, acide, salin), Fruité (arômes de fruits mûrs, accessible), Frais (léger, aromatique, peu d'alcool), Moelleux (sucre résiduel, texture ronde).
+- ${TAG_RULES}
 
 Si l'image n'est pas une étiquette de vin reconnaissable :
 {

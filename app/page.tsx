@@ -1,11 +1,13 @@
 'use client'
 
-import { useState } from 'react'
-import Scanner, { type ScanMode } from '@/components/Scanner'
+import { useRef, useState } from 'react'
+import Scanner from '@/components/Scanner'
 import WineCard, { type WineData } from '@/components/WineCard'
-import WineList, { type CarteData } from '@/components/WineList'
+import WineList, { type CarteData, type WineListItem } from '@/components/WineList'
 
-type View = 'scan' | 'loading' | 'result-bouteille' | 'result-carte'
+export type ScanMode = 'bouteille' | 'carte'
+
+type View = 'scan' | 'loading' | 'result-bouteille' | 'result-carte' | 'result-carte-detail'
 
 async function resizeAndEncode(file: File): Promise<{ base64: string; mimeType: string }> {
   const MAX = 1400
@@ -33,8 +35,19 @@ export default function Home() {
   const [view, setView] = useState<View>('scan')
   const [wineData, setWineData] = useState<WineData | null>(null)
   const [carteData, setCarteData] = useState<CarteData | null>(null)
+  const [lastMode, setLastMode] = useState<ScanMode>('bouteille')
+
+  const bouteilleRef = useRef<HTMLInputElement>(null)
+  const carteRef = useRef<HTMLInputElement>(null)
+
+  const openCapture = (mode: ScanMode) => {
+    setLastMode(mode)
+    if (mode === 'bouteille') bouteilleRef.current?.click()
+    else carteRef.current?.click()
+  }
 
   const handleCapture = async (file: File, mode: ScanMode) => {
+    setLastMode(mode)
     setView('loading')
 
     try {
@@ -67,10 +80,32 @@ export default function Home() {
     }
   }
 
+  const handleSelectWine = async (vin: WineListItem) => {
+    setView('loading')
+    try {
+      const res = await fetch('/api/wine-detail', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nom: vin.nom, millesime: vin.millesime, cepages: vin.cepages }),
+      })
+      const data = await res.json()
+      setWineData(data as WineData)
+      setView('result-carte-detail')
+    } catch {
+      setWineData({ success: false, erreur: 'Erreur de connexion. Réessayez.' })
+      setView('result-carte-detail')
+    }
+  }
+
   const handleReset = () => {
     setView('scan')
     setWineData(null)
     setCarteData(null)
+  }
+
+  const handleBackToCarte = () => {
+    setView('result-carte')
+    setWineData(null)
   }
 
   return (
@@ -78,18 +113,73 @@ export default function Home() {
       className="min-h-screen flex flex-col items-center justify-center px-6 py-16"
       style={{ backgroundColor: 'var(--color-cream)' }}
     >
-      {view === 'scan' && <Scanner onCapture={handleCapture} />}
+      {/* Hidden file inputs — always mounted for retry */}
+      <input
+        ref={bouteilleRef}
+        type="file"
+        accept="image/*"
+        capture="environment"
+        onChange={e => {
+          const f = e.target.files?.[0]
+          if (f) handleCapture(f, 'bouteille')
+          e.target.value = ''
+        }}
+        className="hidden"
+      />
+      <input
+        ref={carteRef}
+        type="file"
+        accept="image/*"
+        capture="environment"
+        onChange={e => {
+          const f = e.target.files?.[0]
+          if (f) handleCapture(f, 'carte')
+          e.target.value = ''
+        }}
+        className="hidden"
+      />
+
+      {view === 'scan' && (
+        <Scanner
+          onOpenBouteille={() => openCapture('bouteille')}
+          onOpenCarte={() => openCapture('carte')}
+        />
+      )}
+
       {view === 'loading' && <LoadingState />}
-      {view === 'result-bouteille' && wineData && <WineCard data={wineData} onReset={handleReset} />}
-      {view === 'result-carte' && carteData && <WineList data={carteData} onReset={handleReset} />}
+
+      {view === 'result-bouteille' && wineData && (
+        <WineCard
+          data={wineData}
+          onReset={handleReset}
+          onRetry={() => openCapture('bouteille')}
+        />
+      )}
+
+      {view === 'result-carte' && carteData && (
+        <WineList
+          data={carteData}
+          onReset={handleReset}
+          onRetry={() => openCapture('carte')}
+          onSelectWine={handleSelectWine}
+        />
+      )}
+
+      {view === 'result-carte-detail' && wineData && (
+        <WineCard
+          data={wineData}
+          onReset={handleReset}
+          onRetry={() => openCapture('carte')}
+          onBack={handleBackToCarte}
+        />
+      )}
     </main>
   )
 }
 
 function LoadingState() {
   return (
-    <div className="flex flex-col items-center gap-7" style={{ animation: 'fadeIn 0.4s ease' }}>
-      <style>{`@keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }`}</style>
+    <div className="flex flex-col items-center gap-7">
       <div
         className="w-10 h-10 rounded-full border animate-spin"
         style={{ borderColor: 'rgba(107, 45, 62, 0.15)', borderTopColor: 'var(--color-bordeaux)' }}

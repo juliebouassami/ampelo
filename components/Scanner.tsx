@@ -1,63 +1,43 @@
 'use client'
 
-import { useRef } from 'react'
-
-export type ScanMode = 'bouteille' | 'carte'
-
 interface ScannerProps {
-  onCapture: (file: File, mode: ScanMode) => void
+  onOpenBouteille: () => void
+  onOpenCarte: () => void
 }
 
-export default function Scanner({ onCapture }: ScannerProps) {
-  const bouteilleRef = useRef<HTMLInputElement>(null)
-  const carteRef = useRef<HTMLInputElement>(null)
-
+export default function Scanner({ onOpenBouteille, onOpenCarte }: ScannerProps) {
   return (
     <div className="flex flex-col items-center gap-12 max-w-xs w-full text-center px-2">
 
-      {/* Logo */}
       <div className="flex flex-col items-center gap-5">
         <WineGlassIcon />
-        <div className="flex flex-col items-center gap-2">
+        <div className="flex flex-col items-center gap-3">
           <h1
             className="italic text-6xl leading-none tracking-tight"
             style={{ color: 'var(--color-bordeaux)', fontFamily: 'var(--font-playfair)' }}
           >
             Ampélo
           </h1>
-          <p
-            className="text-xs tracking-[0.18em] uppercase leading-relaxed"
-            style={{ color: 'var(--color-brown)', opacity: 0.45 }}
-          >
-            Découvrez les cépages de n'importe quel vin
-          </p>
+          <div className="flex flex-col gap-1.5" style={{ color: 'var(--color-brown)', opacity: 0.55 }}>
+            <p className="text-sm leading-relaxed">
+              Le cépage n&apos;est pas toujours indiqué, et pourtant c&apos;est lui qui guide les arômes.
+            </p>
+            <p className="text-sm leading-relaxed">
+              Scannez une bouteille ou une carte des vins pour en savoir plus.
+            </p>
+          </div>
         </div>
       </div>
 
-      {/* Ornament */}
       <div className="w-full flex items-center gap-3">
         <div className="flex-1 h-px" style={{ backgroundColor: 'var(--color-bordeaux)', opacity: 0.15 }} />
         <span style={{ color: 'var(--color-gold)', fontSize: '10px', letterSpacing: '0.3em' }}>✦</span>
         <div className="flex-1 h-px" style={{ backgroundColor: 'var(--color-bordeaux)', opacity: 0.15 }} />
       </div>
 
-      {/* CTAs */}
       <div className="flex flex-col items-center gap-3 w-full">
-
-        <input
-          ref={bouteilleRef}
-          type="file"
-          accept="image/*"
-          capture="environment"
-          onChange={e => {
-            const f = e.target.files?.[0]
-            if (f) onCapture(f, 'bouteille')
-            e.target.value = ''
-          }}
-          className="hidden"
-        />
         <button
-          onClick={() => bouteilleRef.current?.click()}
+          onClick={onOpenBouteille}
           className="w-full rounded-full py-5 px-6 transition-all duration-200 active:scale-95 flex flex-col items-center justify-center gap-1 cursor-pointer"
           style={{
             backgroundColor: 'var(--color-bordeaux)',
@@ -76,20 +56,8 @@ export default function Scanner({ onCapture }: ScannerProps) {
           </span>
         </button>
 
-        <input
-          ref={carteRef}
-          type="file"
-          accept="image/*"
-          capture="environment"
-          onChange={e => {
-            const f = e.target.files?.[0]
-            if (f) onCapture(f, 'carte')
-            e.target.value = ''
-          }}
-          className="hidden"
-        />
         <button
-          onClick={() => carteRef.current?.click()}
+          onClick={onOpenCarte}
           className="w-full rounded-full py-5 px-6 whitespace-nowrap transition-all duration-200 active:scale-95 flex items-center justify-center gap-2 cursor-pointer"
           style={{
             border: '1px solid var(--color-bordeaux)',

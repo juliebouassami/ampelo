@@ -1,6 +1,6 @@
 'use client'
 
-export type StyleTag = 'Puissant' | 'Minéral' | 'Fruité' | 'Frais' | 'Moelleux'
+import { getTagColor } from '@/lib/tags'
 
 export interface WineData {
   success: boolean
@@ -8,7 +8,7 @@ export interface WineData {
   domaine?: string
   millesime?: string
   appellation?: string
-  style?: StyleTag
+  style?: string
   cepages?: { nom: string; pourcentage?: number }[]
   notes_aromatiques?: { famille: string; notes: string[] }[]
   terroir?: string
@@ -18,17 +18,12 @@ export interface WineData {
 interface WineCardProps {
   data: WineData
   onReset: () => void
+  onRetry?: () => void
+  onBack?: () => void
+  resetLabel?: string
 }
 
-const STYLE_COLORS: Record<StyleTag, string> = {
-  Puissant: '#6B2D3E',
-  Minéral: '#3D5A6B',
-  Fruité: '#7A4A2E',
-  Frais: '#2E6B4A',
-  Moelleux: '#6B5A2E',
-}
-
-export default function WineCard({ data, onReset }: WineCardProps) {
+export default function WineCard({ data, onReset, onRetry, onBack, resetLabel }: WineCardProps) {
   if (!data.success || !data.cepages?.length) {
     return (
       <div className="flex flex-col items-center gap-6 max-w-xs w-full text-center px-2">
@@ -41,18 +36,22 @@ export default function WineCard({ data, onReset }: WineCardProps) {
             Essayez avec une photo plus nette, de face, bien éclairée.
           </p>
         </div>
-        <ResetButton onClick={onReset} />
+        <div className="flex flex-col gap-3 w-full">
+          {onRetry && <PrimaryButton label="Réessayer" onClick={onRetry} />}
+          <TextLink label="Retour" onClick={onBack ?? onReset} />
+        </div>
       </div>
     )
   }
 
   const { nom, domaine, millesime, appellation, style, cepages, notes_aromatiques, terroir } = data
-  const hasMeta = millesime || appellation || style
+  const hasMetaLine = millesime || appellation
+  const actionLabel = resetLabel ?? (onBack ? 'Retour à la carte' : 'Scanner une autre bouteille')
+  const actionHandler = onBack ?? onReset
 
   return (
     <div className="flex flex-col gap-5 max-w-xs w-full px-2 pb-6">
 
-      {/* Header — nom + domaine */}
       <div className="flex flex-col items-center gap-1 text-center">
         <h1
           className="italic leading-tight"
@@ -71,28 +70,29 @@ export default function WineCard({ data, onReset }: WineCardProps) {
         )}
       </div>
 
-      {/* Meta — millésime + appellation + style tag inline */}
-      {hasMeta && (
-        <div className="flex items-center justify-center gap-4 flex-wrap">
-          {millesime && (
-            <span className="text-xs tracking-[0.15em] uppercase" style={{ color: 'var(--color-brown)', opacity: 0.5 }}>
-              {millesime}
-            </span>
+      {(hasMetaLine || style) && (
+        <div className="flex flex-col items-center gap-2">
+          {hasMetaLine && (
+            <div className="flex items-center justify-center gap-3">
+              {millesime && (
+                <span className="text-xs tracking-[0.15em] uppercase" style={{ color: 'var(--color-brown)', opacity: 0.5 }}>
+                  {millesime}
+                </span>
+              )}
+              {millesime && appellation && <MetaDot />}
+              {appellation && (
+                <span className="text-xs tracking-[0.15em] uppercase" style={{ color: 'var(--color-brown)', opacity: 0.5 }}>
+                  {appellation}
+                </span>
+              )}
+            </div>
           )}
-          {millesime && appellation && <MetaDot />}
-          {appellation && (
-            <span className="text-xs tracking-[0.15em] uppercase" style={{ color: 'var(--color-brown)', opacity: 0.5 }}>
-              {appellation}
-            </span>
-          )}
-          {style && (appellation || millesime) && <MetaDot />}
-          {style && <StyleBadge style={style} />}
+          {style && <StyleBadge tag={style} />}
         </div>
       )}
 
       <Ornament />
 
-      {/* Cépages */}
       <Section label="Cépages">
         {cepages!.map((c, i) => (
           <div
@@ -112,7 +112,6 @@ export default function WineCard({ data, onReset }: WineCardProps) {
         ))}
       </Section>
 
-      {/* Notes aromatiques */}
       {notes_aromatiques && notes_aromatiques.length > 0 && (
         <>
           <Ornament />
@@ -133,7 +132,6 @@ export default function WineCard({ data, onReset }: WineCardProps) {
         </>
       )}
 
-      {/* Terroir */}
       {terroir && (
         <>
           <Ornament />
@@ -146,7 +144,7 @@ export default function WineCard({ data, onReset }: WineCardProps) {
       )}
 
       <div className="pt-1">
-        <ResetButton onClick={onReset} />
+        <OutlineButton label={actionLabel} onClick={actionHandler} />
       </div>
     </div>
   )
@@ -167,14 +165,14 @@ function MetaDot() {
   return <span style={{ color: 'var(--color-gold)', fontSize: '8px' }}>✦</span>
 }
 
-function StyleBadge({ style }: { style: StyleTag }) {
-  const color = STYLE_COLORS[style] ?? 'var(--color-bordeaux)'
+function StyleBadge({ tag }: { tag: string }) {
+  const color = getTagColor(tag)
   return (
     <span
-      className="text-xs tracking-[0.15em] uppercase px-2.5 py-0.5 rounded-full"
-      style={{ border: `1px solid ${color}`, color, opacity: 0.75, fontFamily: 'var(--font-inter)', fontSize: '10px' }}
+      className="rounded-full px-2.5 py-0.5"
+      style={{ border: `1px solid ${color}`, color, opacity: 0.75, fontFamily: 'var(--font-inter)', fontSize: '10px', letterSpacing: '0.1em' }}
     >
-      {style}
+      {tag}
     </span>
   )
 }
@@ -189,7 +187,19 @@ function Ornament() {
   )
 }
 
-function ResetButton({ onClick }: { onClick: () => void }) {
+function PrimaryButton({ label, onClick }: { label: string; onClick: () => void }) {
+  return (
+    <button
+      onClick={onClick}
+      className="w-full rounded-full py-4 px-8 text-xs tracking-[0.2em] uppercase transition-all duration-200 active:scale-95 cursor-pointer"
+      style={{ backgroundColor: 'var(--color-bordeaux)', color: 'var(--color-cream)', fontFamily: 'var(--font-inter)', border: 'none' }}
+    >
+      {label}
+    </button>
+  )
+}
+
+function OutlineButton({ label, onClick }: { label: string; onClick: () => void }) {
   return (
     <button
       onClick={onClick}
@@ -198,7 +208,19 @@ function ResetButton({ onClick }: { onClick: () => void }) {
       onMouseEnter={e => { e.currentTarget.style.backgroundColor = 'var(--color-bordeaux)'; e.currentTarget.style.color = 'var(--color-cream)' }}
       onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = 'var(--color-bordeaux)' }}
     >
-      Scanner une autre bouteille
+      {label}
+    </button>
+  )
+}
+
+function TextLink({ label, onClick }: { label: string; onClick: () => void }) {
+  return (
+    <button
+      onClick={onClick}
+      className="text-xs cursor-pointer bg-transparent border-none"
+      style={{ color: 'var(--color-brown)', opacity: 0.4, fontFamily: 'var(--font-inter)' }}
+    >
+      {label}
     </button>
   )
 }

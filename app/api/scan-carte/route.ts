@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import OpenAI from 'openai'
+import { TAG_RULES } from '@/lib/prompts'
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
 
@@ -16,7 +17,7 @@ Identifie tous les vins listés sur la carte et retourne :
       "millesime": "année si visible sur la carte (ex: 2021) ou chaîne vide",
       "cepages": "cépages en une ligne (ex: Pinot Noir, ou Grenache · Syrah · Mourvèdre)",
       "notes": "3 à 4 notes aromatiques courtes séparées par · (ex: cerise · sous-bois · épices)",
-      "style": "un seul mot parmi : Puissant, Minéral, Fruité, Frais, Moelleux"
+      "style": "un tag de la liste ci-dessous"
     }
   ]
 }
@@ -26,7 +27,7 @@ Règles :
 - Le millésime doit toujours être dans le champ "millesime", jamais dans "nom".
 - Pour les cépages : base-toi sur l'appellation si non indiqués.
 - Pour les notes : concrètes et évocatrices, maximum 4 mots/expressions.
-- Pour le style : Puissant (charpenté, tannique), Minéral (tendu, salin), Fruité (accessible, fruité mûr), Frais (léger, aromatique), Moelleux (sucré, rond).
+- ${TAG_RULES}
 - Si l'image n'est pas lisible ou n'est pas une carte des vins :
 
 {
