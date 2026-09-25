@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import type { Locale } from '@/lib/i18n'
 import { ui } from '@/lib/i18n'
-import { getTagColor, getTagLabel } from '@/lib/tags'
+import { getDisplayTags, getTagColor, getTagLabel } from '@/lib/tags'
 
 export interface WineListItem {
   nom: string
@@ -11,6 +11,7 @@ export interface WineListItem {
   cepages: string
   notes: string
   style: string
+  tags?: string[]
 }
 
 export interface CarteData {
@@ -63,10 +64,10 @@ export default function WineList({ data, onReset, onRetry, onSelectWine, locale 
   }
 
   const filtered = activeFilter
-    ? data.vins.filter(v => v.style === activeFilter)
+    ? data.vins.filter(v => getDisplayTags(v.tags, v.style, 3).includes(activeFilter))
     : data.vins
 
-  const availableStyles = [...new Set(data.vins.map(v => v.style))]
+  const availableStyles = [...new Set(data.vins.flatMap(v => getDisplayTags(v.tags, v.style, 3)))]
 
   return (
     <div className="flex flex-col gap-6 w-full max-w-sm px-2 pb-8">
@@ -133,7 +134,7 @@ export default function WineList({ data, onReset, onRetry, onSelectWine, locale 
 }
 
 function WineRow({ vin, last, locale, onClick }: { vin: WineListItem; last: boolean; locale: Locale; onClick?: () => void }) {
-  const color = getTagColor(vin.style)
+  const tags = getDisplayTags(vin.tags, vin.style, 3)
 
   return (
     <div
@@ -155,20 +156,13 @@ function WineRow({ vin, last, locale, onClick }: { vin: WineListItem; last: bool
             </p>
           )}
         </div>
-        <span
-          className="shrink-0 rounded-full px-2 py-0.5"
-          style={{
-            border: `1px solid ${color}`,
-            color,
-            opacity: 0.8,
-            fontFamily: 'var(--font-inter)',
-            fontSize: '10px',
-            letterSpacing: '0.1em',
-            marginTop: '3px',
-          }}
-        >
-          {getTagLabel(vin.style, locale)}
-        </span>
+        {tags.length > 0 && (
+          <div className="flex shrink-0 flex-wrap justify-end gap-1 max-w-[46%] pt-0.5">
+            {tags.map(tag => (
+              <TagPill key={tag} tag={tag} locale={locale} />
+            ))}
+          </div>
+        )}
       </div>
       <p className="text-xs tracking-wide" style={{ color: 'var(--color-brown)', opacity: 0.5 }}>
         {vin.cepages}
@@ -177,6 +171,26 @@ function WineRow({ vin, last, locale, onClick }: { vin: WineListItem; last: bool
         {vin.notes}
       </p>
     </div>
+  )
+}
+
+function TagPill({ tag, locale }: { tag: string; locale: Locale }) {
+  const color = getTagColor(tag)
+
+  return (
+    <span
+      className="rounded-full px-2 py-0.5"
+      style={{
+        border: `1px solid ${color}`,
+        color,
+        opacity: 0.8,
+        fontFamily: 'var(--font-inter)',
+        fontSize: '9px',
+        letterSpacing: '0.08em',
+      }}
+    >
+      {getTagLabel(tag, locale)}
+    </span>
   )
 }
 

@@ -2,7 +2,7 @@
 
 import type { Locale } from '@/lib/i18n'
 import { ui } from '@/lib/i18n'
-import { getTagColor, getTagLabel } from '@/lib/tags'
+import { getDisplayTags, getTagColor, getTagLabel } from '@/lib/tags'
 
 export interface WineData {
   success: boolean
@@ -11,6 +11,7 @@ export interface WineData {
   millesime?: string
   appellation?: string
   style?: string
+  tags?: string[]
   cepages?: { nom: string; pourcentage?: number }[]
   notes_aromatiques?: { famille: string; notes: string[] }[]
   terroir?: string
@@ -49,10 +50,11 @@ export default function WineCard({ data, onReset, onRetry, onBack, resetLabel, l
     )
   }
 
-  const { nom, domaine, millesime, appellation, style, cepages, notes_aromatiques, terroir } = data
+  const { nom, domaine, millesime, appellation, style, tags, cepages, notes_aromatiques, terroir } = data
   const hasMetaLine = millesime || appellation
   const actionLabel = resetLabel ?? (onBack ? copy.actions.backToList : copy.actions.scanAnotherBottle)
   const actionHandler = onBack ?? onReset
+  const displayTags = getDisplayTags(tags, style, 6)
 
   return (
     <div className="flex flex-col gap-5 max-w-xs w-full px-2 pb-6">
@@ -75,7 +77,7 @@ export default function WineCard({ data, onReset, onRetry, onBack, resetLabel, l
         )}
       </div>
 
-      {(hasMetaLine || style) && (
+      {(hasMetaLine || displayTags.length > 0) && (
         <div className="flex flex-col items-center gap-2">
           {hasMetaLine && (
             <div className="flex items-center justify-center gap-3">
@@ -92,7 +94,13 @@ export default function WineCard({ data, onReset, onRetry, onBack, resetLabel, l
               )}
             </div>
           )}
-          {style && <StyleBadge tag={style} locale={locale} />}
+          {displayTags.length > 0 && (
+            <div className="flex flex-wrap justify-center gap-1.5">
+              {displayTags.map(tag => (
+                <StyleBadge key={tag} tag={tag} locale={locale} />
+              ))}
+            </div>
+          )}
         </div>
       )}
 

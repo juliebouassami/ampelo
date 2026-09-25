@@ -17,7 +17,8 @@ Return ONLY a valid JSON object, with no markdown, no explanation, and no surrou
   "domaine": "estate or producer if known, otherwise empty string",
   "millesime": "year if provided, otherwise empty string",
   "appellation": "AOC/AOP appellation or region",
-  "style": "one tag from the list below",
+  "style": "first and most important tag, same value as tags[0]",
+  "tags": ["ripe cherry", "soft tannins", "elegant", "floral"],
   "cepages": [
     { "nom": "Pinot Noir", "pourcentage": 100 }
   ],
@@ -30,10 +31,11 @@ Return ONLY a valid JSON object, with no markdown, no explanation, and no surrou
 
 Rules:
 - Use the provided grape varieties when present, otherwise infer them from the appellation.
+- If initial priority tags are provided, keep them when they are relevant and complete them up to 4 to 6 tags.
 - Estimate percentages based on typical appellation proportions.
 - Aromatic notes: 2 to 4 families among Fruity / Floral / Spicy / Earthy / Oaky / Mineral.
 - Terroir: one short sentence about what the soil and region bring to the wine.
-- ${getTagRules(locale)}
+- ${getTagRules(locale, '4 to 6')}
 
 If the wine is unknown:
 {
@@ -52,7 +54,8 @@ Retourne UNIQUEMENT un objet JSON valide, sans markdown, sans explication, sans 
   "domaine": "domaine ou producteur si connu, sinon chaîne vide",
   "millesime": "année si fournie, sinon chaîne vide",
   "appellation": "appellation AOC/AOP ou région",
-  "style": "un tag de la liste ci-dessous",
+  "style": "premier tag le plus important, même valeur que tags[0]",
+  "tags": ["cerise mûre", "tanins souples", "élégant", "floral"],
   "cepages": [
     { "nom": "Pinot Noir", "pourcentage": 100 }
   ],
@@ -65,10 +68,11 @@ Retourne UNIQUEMENT un objet JSON valide, sans markdown, sans explication, sans 
 
 Règles :
 - Utilise les cépages fournis si présents, sinon déduis-les de l'appellation.
+- Si des tags prioritaires initiaux sont fournis, conserve-les quand ils sont pertinents et complète-les jusqu'à 4 à 6 tags.
 - Estime les pourcentages d'après les proportions typiques de l'appellation.
 - Notes aromatiques : 2 à 4 familles parmi Fruité / Floral / Épicé / Terreux / Boisé / Minéral.
 - Terroir : une phrase courte sur ce que le sol et la région apportent.
-- ${getTagRules(locale)}
+- ${getTagRules(locale, '4 à 6')}
 
 Si le vin est inconnu :
 {
@@ -83,7 +87,7 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
     locale = normalizeLocale(body.locale)
-    const { nom, millesime, cepages } = body
+    const { nom, millesime, cepages, notes, tags } = body
 
     if (!nom) {
       return NextResponse.json(
@@ -93,8 +97,8 @@ export async function POST(req: NextRequest) {
     }
 
     const userMessage = locale === 'en'
-      ? `Wine: ${nom}${millesime ? `\nVintage: ${millesime}` : ''}${cepages ? `\nGrape varieties: ${cepages}` : ''}`
-      : `Vin : ${nom}${millesime ? `\nMillésime : ${millesime}` : ''}${cepages ? `\nCépages : ${cepages}` : ''}`
+      ? `Wine: ${nom}${millesime ? `\nVintage: ${millesime}` : ''}${cepages ? `\nGrape varieties: ${cepages}` : ''}${notes ? `\nInitial notes: ${notes}` : ''}${Array.isArray(tags) && tags.length ? `\nInitial priority tags: ${tags.join(' · ')}` : ''}`
+      : `Vin : ${nom}${millesime ? `\nMillésime : ${millesime}` : ''}${cepages ? `\nCépages : ${cepages}` : ''}${notes ? `\nNotes initiales : ${notes}` : ''}${Array.isArray(tags) && tags.length ? `\nTags prioritaires initiaux : ${tags.join(' · ')}` : ''}`
 
     const response = await openai.chat.completions.create({
       model: 'gpt-4o',

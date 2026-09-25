@@ -20,7 +20,8 @@ Identify every wine listed on the wine list and return:
       "millesime": "year if visible on the list (ex: 2021) or empty string",
       "cepages": "grape varieties in one line (ex: Pinot Noir, or Grenache · Syrah · Mourvèdre)",
       "notes": "3 to 4 short aromatic notes separated by · (ex: cherry · forest floor · spice)",
-      "style": "one tag from the list below"
+      "style": "first and most important tag, same value as tags[0]",
+      "tags": ["ripe cherry", "soft tannins", "elegant"]
     }
   ]
 }
@@ -30,7 +31,7 @@ Rules:
 - The vintage must always be in the "millesime" field, never in "nom".
 - For grape varieties: infer them from the appellation when they are not shown.
 - For notes: concrete and evocative, maximum 4 words/phrases.
-- ${getTagRules(locale)}
+- ${getTagRules(locale, 'exactly 3')}
 - If the image is not readable or is not a wine list:
 
 {
@@ -52,7 +53,8 @@ Identifie tous les vins listés sur la carte et retourne :
       "millesime": "année si visible sur la carte (ex: 2021) ou chaîne vide",
       "cepages": "cépages en une ligne (ex: Pinot Noir, ou Grenache · Syrah · Mourvèdre)",
       "notes": "3 à 4 notes aromatiques courtes séparées par · (ex: cerise · sous-bois · épices)",
-      "style": "un tag de la liste ci-dessous"
+      "style": "premier tag le plus important, même valeur que tags[0]",
+      "tags": ["cerise mûre", "tanins souples", "élégant"]
     }
   ]
 }
@@ -62,7 +64,7 @@ Règles :
 - Le millésime doit toujours être dans le champ "millesime", jamais dans "nom".
 - Pour les cépages : base-toi sur l'appellation si non indiqués.
 - Pour les notes : concrètes et évocatrices, maximum 4 mots/expressions.
-- ${getTagRules(locale)}
+- ${getTagRules(locale, 'exactement 3')}
 - Si l'image n'est pas lisible ou n'est pas une carte des vins :
 
 {

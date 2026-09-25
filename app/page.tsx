@@ -104,7 +104,7 @@ export default function Home() {
       const res = await fetch('/api/wine-detail', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ nom: vin.nom, millesime: vin.millesime, cepages: vin.cepages, locale }),
+        body: JSON.stringify({ nom: vin.nom, millesime: vin.millesime, cepages: vin.cepages, notes: vin.notes, tags: vin.tags, locale }),
       })
       const data = await res.json()
       setWineData(data as WineData)

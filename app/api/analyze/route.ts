@@ -18,7 +18,8 @@ If you identify the wine:
   "domaine": "estate or producer name (ex: Domaine Leflaive, Château Pétrus…)",
   "millesime": "year visible on the label (ex: 2019) or empty string if not visible",
   "appellation": "AOC/AOP appellation or region (ex: Pomerol, Burgundy, Rhône Valley…)",
-  "style": "one tag from the list below",
+  "style": "first and most important tag, same value as tags[0]",
+  "tags": ["ripe cherry", "soft tannins", "elegant", "floral"],
   "cepages": [
     { "nom": "Cabernet Sauvignon", "pourcentage": 70 },
     { "nom": "Merlot", "pourcentage": 30 }
@@ -35,7 +36,7 @@ Rules:
 - Grape varieties: use percentages shown on the label when present, otherwise estimate from the typical blend of the appellation.
 - Aromatic notes: 2 to 4 relevant families among Fruity / Floral / Spicy / Earthy / Oaky / Mineral. 3 to 4 concrete, evocative notes per family.
 - Terroir: one short sentence explaining what the soil and region bring to the wine. Start with the soil type when known.
-- ${getTagRules(locale)}
+- ${getTagRules(locale, '4 to 6')}
 
 If the image is not a recognizable wine label:
 {
@@ -55,7 +56,8 @@ Si tu identifies le vin :
   "domaine": "nom du domaine ou producteur (ex: Domaine Leflaive, Château Pétrus…)",
   "millesime": "année visible sur l'étiquette (ex: 2019) ou chaîne vide si non visible",
   "appellation": "appellation AOC/AOP ou région (ex: Pomerol, Bourgogne, Vallée du Rhône…)",
-  "style": "un tag de la liste ci-dessous",
+  "style": "premier tag le plus important, même valeur que tags[0]",
+  "tags": ["cerise mûre", "tanins souples", "élégant", "floral"],
   "cepages": [
     { "nom": "Cabernet Sauvignon", "pourcentage": 70 },
     { "nom": "Merlot", "pourcentage": 30 }
@@ -72,7 +74,7 @@ Règles :
 - Cépages : utilise les pourcentages de l'étiquette si présents, sinon estime d'après les proportions typiques de l'appellation.
 - Notes aromatiques : 2 à 4 familles pertinentes parmi Fruité / Floral / Épicé / Terreux / Boisé / Minéral. 3 à 4 notes par famille, concrètes et évocatrices.
 - Terroir : une phrase courte expliquant ce que le sol et la région apportent au vin. Commence par le type de sol si connu.
-- ${getTagRules(locale)}
+- ${getTagRules(locale, '4 à 6')}
 
 Si l'image n'est pas une étiquette de vin reconnaissable :
 {
